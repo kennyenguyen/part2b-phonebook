@@ -1,29 +1,15 @@
 import {useState} from 'react'
 
-const Filter = () => {
-
-}
-
-const PersonForm = ({name, number}) => {
-    // return (
-    //     <form onSubmit={addPerson}>
-    //         <div>name: <input value={name} onChange={handleNameChange} /></div>
-    //         <div>number: <input value={number} onChange={handlePhoneChange} /></div>
-    //         <div><button type="submit">add</button></div>
-    //     </form>
-    // )
-}
-
-const Persons = () => {
-
-}
-
 const App = () => {
     const [persons, setPersons] = useState([
-        {name: 'Arto Hellas', phone: '908-240-1337'}
+        {name: 'Arto Hellas', phone: '908-240-1337'}, 
+        {name: 'Ardo Hellas', phone: '908-240-1338'}, 
+        {name: 'Bart Hellas', phone: '908-240-1339'}, 
+        {name: 'Bard Hellas', phone: '908-240-1330'}, 
     ])
     const [newName, setNewName] = useState('')
     const [newPhone, setNewPhone] = useState('')
+    const [newFilter, setNewFilter] = useState('')
 
     const addPerson = (event) => {
         event.preventDefault()
@@ -52,35 +38,33 @@ const App = () => {
         setNewPhone(event.target.value)
     }
 
-    return (
-        <>
-            <h2>Phonebook</h2>
-            <Filter />
-            <h3>Add a new</h3>
-            <PersonForm name={newName} number={newPhone} />
-            <h3>Numbers</h3>
-            <Persons />
-        </>
-    )
+    const handleFilterChange = (event) => {
+        console.log(event.target.value)
+        setNewFilter(event.target.value)
+    }
 
+    const personsToShow = newFilter
+        ? persons.filter(person => person.name.toLowerCase().startsWith(newFilter.toLowerCase())) 
+        : persons
 
     return (
         <div>
             <h2>Phonebook</h2>
+            <div>filter shown with <input value={newFilter} onChange={handleFilterChange} /></div>
+
+            <h3>add a new</h3>
             <form onSubmit={addPerson}>
                 <div>name: <input value={newName} onChange={handleNameChange} /></div>
                 <div>number: <input value={newPhone} onChange={handlePhoneChange} /></div>
                 <div><button type="submit">add</button></div>
             </form>
-            <h2>Numbers</h2>
+
+            <h3>Numbers</h3>
             <div>
-                {persons.map(person =>
-                    <p key={persons.indexOf(person)}>{person.name} {person.phone}</p>
+                {personsToShow.map(person =>
+                    <p key={personsToShow.indexOf(person)}>{person.name} {person.phone}</p>
                 )}
             </div>
-
-            <div>debug: {newName} {newPhone}</div>
-
         </div>
     )
 }
