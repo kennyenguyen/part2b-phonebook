@@ -1,5 +1,8 @@
 import {useState, useEffect} from 'react'
-import axios from 'axios'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
+import personService from './services/persons'
 
 const App = () => {
     const [persons, setPersons] = useState([])
@@ -8,12 +11,10 @@ const App = () => {
     const [newFilter, setNewFilter] = useState('')
 
     useEffect(() => {
-        console.log('effect')
-        axios
-            .get('http://localhost:3001/persons')
-            .then(response => {
-                console.log('promise fulfilled')
-                setPersons(response.data)
+        personService
+            .getAll()
+            .then(initialPersons => {
+                setPersons(initialPersons)
             })
     }, [])
 
@@ -27,11 +28,24 @@ const App = () => {
             const personObject = {
                 name: newName, 
                 number: newPhone,
-                id: persons.length + 1,
             }
-            setPersons(persons.concat(personObject))
-            setNewName('')
-            setNewPhone('')
+            personService
+                .create(personObject)
+                .then(returnedPerson => {
+                    setPersons(persons.concat(returnedPerson))
+                    setNewName('')
+                    setNewPhone('')
+                })
+        }
+    }
+
+    const deletePerson = (person) => {
+        if (window.confirm(`Delete ${person.name} ?`)) {
+            personService
+            .remove(person.id)
+            .then(response => {
+                console.log(response)
+            })
         }
     }
 
@@ -51,27 +65,23 @@ const App = () => {
     }
 
     const personsToShow = newFilter
-        ? persons.filter(person => person.name.toLowerCase().startsWith(newFilter.toLowerCase())) 
+        ? persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase())) 
         : persons
 
     return (
         <div>
             <h2>Phonebook</h2>
-            <div>filter shown with <input value={newFilter} onChange={handleFilterChange} /></div>
-
+            <Filter filter={newFilter} onFilterChange={handleFilterChange} />
             <h3>add a new</h3>
-            <form onSubmit={addPerson}>
-                <div>name: <input value={newName} onChange={handleNameChange} /></div>
-                <div>number: <input value={newPhone} onChange={handlePhoneChange} /></div>
-                <div><button type="submit">add</button></div>
-            </form>
-
+            <PersonForm
+                onFormSubmit={addPerson} 
+                onNameChange={handleNameChange} 
+                onNumberChange={handlePhoneChange} 
+                nameValue={newName} 
+                numberValue={newPhone} 
+            />
             <h3>Numbers</h3>
-            <div>
-                {personsToShow.map(person =>
-                    <p key={personsToShow.indexOf(person)}>{person.name} {person.number}</p>
-                )}
-            </div>
+            <Persons personsToShow={personsToShow} buttonClick={deletePerson} />
         </div>
     )
 }
